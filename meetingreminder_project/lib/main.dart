@@ -1,9 +1,15 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, use_key_in_widget_constructors
 
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-void main() {
-  debugPrint('main metodu çalıştı');
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(MyApp());
 }
 
@@ -25,7 +31,19 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  FirebaseAuth auth = FirebaseAuth.instance;
+  String _email = "";
+  String _password = "";
+  final myEmailController = TextEditingController();
+  final myPassController = TextEditingController();
   @override
+  void dispose() {
+    // Clean up the controller when the widget is disposed.
+    myEmailController.dispose();
+    myPassController.dispose();
+    super.dispose();
+  }
+
   Widget build(BuildContext context) {
     return Scaffold(
         //backgroundColor: Colors.lightBlueAccent,
@@ -46,6 +64,7 @@ class _LoginPageState extends State<LoginPage> {
                   //email kısmı
                   padding: EdgeInsets.symmetric(horizontal: 15),
                   child: TextField(
+                      controller: myEmailController,
                       decoration: InputDecoration(
                           border: OutlineInputBorder(),
                           labelText: 'Email',
@@ -55,6 +74,7 @@ class _LoginPageState extends State<LoginPage> {
                 padding: const EdgeInsets.only(
                     left: 15.0, right: 15.0, top: 15, bottom: 0),
                 child: TextField(
+                  controller: myPassController,
                   obscureText: true,
                   decoration: InputDecoration(
                       border: OutlineInputBorder(),
@@ -64,8 +84,46 @@ class _LoginPageState extends State<LoginPage> {
               ),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 15),
-                child: ElevatedButton(onPressed: () {}, child: Text("LOGIN")),
+                child: ElevatedButton(
+                    onPressed: () {
+                      _email = myEmailController.text;
+                      _password = myPassController.text;
+                      loginUserEmailAndPassword();
+                      //print(_email);
+                      //print(_password);
+                    },
+                    child: Text("LOGIN")),
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 15),
+                child: ElevatedButton(
+                    onPressed: () {
+                      _email = myEmailController.text;
+                      _password = myPassController.text;
+                      createUserEmailAndPassword();
+                    },
+                    child: Text("CREATE ACCOUNT")),
               ),
             ])));
+  }
+
+  void createUserEmailAndPassword() async {
+    try {
+      var _userCredential = await auth.createUserWithEmailAndPassword(
+          email: _email, password: _password);
+      debugPrint(_userCredential.toString());
+    } catch (e) {
+      print(e.toString());
+    }
+  }
+
+  void loginUserEmailAndPassword() async {
+    try {
+      var _userCredential = await auth.signInWithEmailAndPassword(
+          email: _email, password: _password);
+      debugPrint(_userCredential.toString());
+    } catch (e) {
+      print(e.toString());
+    }
   }
 }
