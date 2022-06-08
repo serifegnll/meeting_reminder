@@ -1,7 +1,7 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, use_key_in_widget_constructors
 
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:meetingreminder_project/reminder_page.dart';
 import 'firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -17,7 +17,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(primarySwatch: Colors.teal),
+      theme: ThemeData(
+        appBarTheme: AppBarTheme(
+          color: const Color.fromARGB(255, 60, 60, 60),
+        )
+      ),
       home: LoginPage(),
     );
   }
@@ -36,7 +40,20 @@ class _LoginPageState extends State<LoginPage> {
   String _password = "";
   final myEmailController = TextEditingController();
   final myPassController = TextEditingController();
+  int login = 0;
   @override
+  void initState() {
+    super.initState();
+    auth = FirebaseAuth.instance;
+    auth.authStateChanges().listen((User? user) {
+      if (user == null) {
+        debugPrint('user offline');
+      } else {
+        debugPrint('user online');
+      }
+    });
+  }
+
   void dispose() {
     // Clean up the controller when the widget is disposed.
     myEmailController.dispose();
@@ -47,7 +64,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
         //backgroundColor: Colors.lightBlueAccent,
-        appBar: AppBar(title: Text('Login Page')), //ustteki bar
+        appBar: AppBar(title: Text('Giriş Yap')), //ustteki bar
         body: Center(
             child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -56,7 +73,7 @@ class _LoginPageState extends State<LoginPage> {
                   padding: EdgeInsets.only(top: 30),
                   child: Center(
                     child: Text(
-                      "Welcome Back!\n", //karşılama yazısı
+                      "Hoşgeldiniz!\n", //karşılama yazısı
                       style: TextStyle(color: Colors.black, fontSize: 30),
                     ),
                   )),
@@ -66,7 +83,13 @@ class _LoginPageState extends State<LoginPage> {
                   child: TextField(
                       controller: myEmailController,
                       decoration: InputDecoration(
-                          border: OutlineInputBorder(),
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.black, width: 2.0),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.black, width: 2.0),),
+                          focusedBorder:OutlineInputBorder(
+                            borderSide: const BorderSide(color: Colors.grey, width: 2.0),),
                           labelText: 'Email',
                           hintText: 'Enter your e-mail adress'))),
               Padding(
@@ -77,53 +100,78 @@ class _LoginPageState extends State<LoginPage> {
                   controller: myPassController,
                   obscureText: true,
                   decoration: InputDecoration(
-                      border: OutlineInputBorder(),
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.black, width: 2.0),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.black, width: 2.0),),
+                      focusedBorder:OutlineInputBorder(
+                        borderSide: const BorderSide(color: Colors.grey, width: 2.0),),
                       labelText: 'Password',
                       hintText: 'Password'),
                 ),
               ),
               Padding(
+                // ******GİRİŞ YAP*****
                 padding: EdgeInsets.symmetric(horizontal: 15),
                 child: ElevatedButton(
-                    onPressed: () {
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all(Colors.black),
+                    ),
+                    onPressed: () async {
                       _email = myEmailController.text;
                       _password = myPassController.text;
-                      loginUserEmailAndPassword();
-                      //print(_email);
-                      //print(_password);
+                      if (await loginUserEmailAndPassword() == 1) {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => ReminderPage()));
+                      } else {
+                        //buraya error mesajını pop up gibi bişeyle götermem lazım
+                      }
                     },
-                    child: Text("LOGIN")),
+                    child: Text("GİRİŞ YAP")),
               ),
               Padding(
+                //*******KAYDOL*********
                 padding: EdgeInsets.symmetric(horizontal: 15),
                 child: ElevatedButton(
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all(Colors.black),
+                    ),
                     onPressed: () {
                       _email = myEmailController.text;
                       _password = myPassController.text;
                       createUserEmailAndPassword();
                     },
-                    child: Text("CREATE ACCOUNT")),
+                    child: Text("KAYDOL")),
               ),
             ])));
   }
 
-  void createUserEmailAndPassword() async {
+  createUserEmailAndPassword() async {
     try {
       var _userCredential = await auth.createUserWithEmailAndPassword(
           email: _email, password: _password);
       debugPrint(_userCredential.toString());
+      login = 1;
     } catch (e) {
-      print(e.toString());
+      login = 0;
+      //print(e.toString());
     }
+    return login;
   }
 
-  void loginUserEmailAndPassword() async {
+  loginUserEmailAndPassword() async {
     try {
       var _userCredential = await auth.signInWithEmailAndPassword(
           email: _email, password: _password);
       debugPrint(_userCredential.toString());
+      login = 1;
     } catch (e) {
-      print(e.toString());
+      login = 0;
+      //print(e.toString());
     }
+    return login;
   }
 }
