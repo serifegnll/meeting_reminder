@@ -1,4 +1,5 @@
 
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:meetingreminder_project/reminder_page.dart';
@@ -14,8 +15,12 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
+
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
+
   @override
   Widget build(BuildContext context) {
+    messaging.subscribeToTopic("messaging");
     return MaterialApp(
       theme: ThemeData(
         appBarTheme: AppBarTheme(
@@ -165,7 +170,7 @@ class _LoginPageState extends State<LoginPage> {
   loginUserEmailAndPassword() async {
     try {
       var _userCredential = await auth.signInWithEmailAndPassword(
-          email: _email, password: _password);
+          email: _email.trimLeft(), password: _password);
       debugPrint(_userCredential.toString());
       login = 1;
     } catch (e) {

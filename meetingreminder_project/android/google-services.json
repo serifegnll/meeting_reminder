@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "323218960593",
+    "project_id": "meeting-reminder-890bc",
+    "storage_bucket": "meeting-reminder-890bc.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:323218960593:android:9b3e6e63050e40135415f0",
+        "android_client_info": {
+          "package_name": "seri.meetingreminder_project"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "323218960593-tarlv7sbqtc184fpd6033jhktiftkdod.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "seri.meetingreminder_project",
+            "certificate_hash": "853e234cb8ac4ce3b42292e79f3b102ca146ebc1"
+          }
+        },
+        {
+          "client_id": "323218960593-3sjap5j5b9e93ktjd47qm749b1n36shf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCdGqniSizMuwHBoGqamHiaTY_73GQFWO8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "323218960593-3sjap5j5b9e93ktjd47qm749b1n36shf.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "323218960593-al97addko8og1m8n8c2d02pb1pqmaph3.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "seri.meetingreminderProject"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
