@@ -6,6 +6,7 @@ import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:meetingreminder_project/custom_dialog.dart';
+import 'package:meetingreminder_project/viewModel.dart';
 
 class AddMeetingPage extends StatefulWidget {
   const AddMeetingPage({Key? key}) : super(key: key);
@@ -152,6 +153,7 @@ class AddMeetingPageState extends State<AddMeetingPage> {
                 ),
                 onPressed: (() async {
                   await veriEkle();
+
                   showDialog(
                     context: context,
                     builder: (BuildContext context) {
@@ -161,12 +163,25 @@ class AddMeetingPageState extends State<AddMeetingPage> {
                         content: new Text("Alert Dialog body"),
                         actions: <Widget>[
                           // usually buttons at the bottom of the dialog
-                          new FlatButton(
+                          ElevatedButton(
                             child: new Text("Close"),
                             onPressed: () {
                               Navigator.of(context).pop();
                             },
                           ),
+                          ElevatedButton(
+                            child: new Text("Bildirim Gönder"),
+                            onPressed: () async {
+                              await NotificationVM.bildirimGonder(toplantiAdiController.text, DateFormat("dd.MM.yyyy - HH:mm ").format(secilenTarih));
+                            },
+                          ),
+                          //TODO: admin yetkisi gelecek.
+                          //TODO: tasarımlar değişecek,
+                          //TODO: geçen toplantılar biten toplantılar sayfasına eklenecek
+                          //TODO: toplantılar arasında sıralama yapılacak
+                          //TODO: taslak eklenecek
+                          //TODO: tarihi yaklaşanlar renk değiştirecek
+                          //TODO: localde katıldığım toplantılar falan tutulsun. SQFLite
                         ],
                       );
 

@@ -46,8 +46,15 @@ class _LoginPageState extends State<LoginPage> {
   final myEmailController = TextEditingController();
   final myPassController = TextEditingController();
   int login = 0;
+  FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
+
+  void fcmSubscribe() {
+    firebaseMessaging.subscribeToTopic('TopicToListen');
+  }
   @override
   void initState() {
+    fcmSubscribe();
+
     super.initState();
     auth = FirebaseAuth.instance;
     auth.authStateChanges().listen((User? user) {
