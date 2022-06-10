@@ -7,7 +7,7 @@ class NotificationVM {
     await  http.post( Uri.parse(url),
         headers: <String, String>{
           'Content-Type': 'application/json',
-          'Authorization': 'key=AAAAS0FZ8NE:APA91bF_VLMREMzVecxnyyMvmD0SmDydlpp-8RVDBtQlKOBZs2Ghq28JWJfT8Io4FnVR-R__O0iJK7jkud7FXR0fzAl_0nFgU6K_CCDXkq_i8Fg1xRBENV1hQHQ7IqTi-7rXGZUS1nmL'
+          'Authorization': 'key=*'
         },
         body: jsonEncode({
           'notification': <String, dynamic>{
