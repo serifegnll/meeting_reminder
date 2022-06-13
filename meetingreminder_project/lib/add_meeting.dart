@@ -6,6 +6,7 @@ import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:meetingreminder_project/custom_dialog.dart';
+import 'package:meetingreminder_project/reminder_page.dart';
 import 'package:meetingreminder_project/viewModel.dart';
 
 class AddMeetingPage extends StatefulWidget {
@@ -159,29 +160,40 @@ class AddMeetingPageState extends State<AddMeetingPage> {
                     builder: (BuildContext context) {
                       // return object of type Dialog
                       return AlertDialog(
-                        title: new Text("Başarıyla Kaydedilmiştir."),
-                        content: new Text("Alert Dialog body"),
+                        title: new Text("Kaydedildi."),
+                        content: new Text("Toplantıyı listede görebilirsiniz."),
                         actions: <Widget>[
                           // usually buttons at the bottom of the dialog
                           ElevatedButton(
-                            child: new Text("Close"),
+                            style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all(Colors.black),
+                            ),
+                            child: new Text("Listeye Dön"),
                             onPressed: () {
                               Navigator.of(context).pop();
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => const ReminderPage()));
                             },
                           ),
                           ElevatedButton(
+                            style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all(Colors.black),
+                            ),
                             child: new Text("Bildirim Gönder"),
                             onPressed: () async {
                               await NotificationVM.bildirimGonder(toplantiAdiController.text, DateFormat("dd.MM.yyyy - HH:mm ").format(secilenTarih));
                             },
                           ),
-                          //TODO: admin yetkisi gelecek.
+                          //TODO: admin yetkisi gelecek. --
                           //TODO: tasarımlar değişecek,
                           //TODO: geçen toplantılar biten toplantılar sayfasına eklenecek
                           //TODO: toplantılar arasında sıralama yapılacak
                           //TODO: taslak eklenecek
                           //TODO: tarihi yaklaşanlar renk değiştirecek
                           //TODO: localde katıldığım toplantılar falan tutulsun. SQFLite
+                          //TODO: sharedpref meselesini araştırcaz oturum açık kalsın diye falan
                         ],
                       );
 

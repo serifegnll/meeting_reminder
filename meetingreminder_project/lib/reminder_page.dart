@@ -15,8 +15,14 @@ class ReminderPage extends StatefulWidget {
 }
 
 class _ReminderPageState extends State<ReminderPage> {
-  var adminControll = false;
+  var adminControl = false;
   FirebaseFirestore firestore = FirebaseFirestore.instance;
+
+  @override
+  void initState() {
+    adminKontrol();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,19 +30,22 @@ class _ReminderPageState extends State<ReminderPage> {
       appBar: AppBar(
         title: const Text("Toplantılar"),
         actions: [
-          IconButton(
+          adminControl == true
+              ? IconButton(
               onPressed: () async {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const AddMeetingPage()));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const AddMeetingPage()));
+
               },
-              icon: const Icon(Icons.add)),
+              icon: const Icon(Icons.add))
+              : Container(),
         ],
       ),
       body: StreamBuilder(
           stream:
-              FirebaseFirestore.instance.collection('toplantilar').snapshots(),
+          FirebaseFirestore.instance.collection('toplantilar').snapshots(),
           builder: (context, AsyncSnapshot<QuerySnapshot> streamSnapshot) {
             return ListView.builder(
                 itemCount: streamSnapshot.data?.docs.length,
@@ -46,19 +55,7 @@ class _ReminderPageState extends State<ReminderPage> {
           }),
     );
 
-    /*Container(
-          child: Column(
-        children: [
-          Container(child: Text("TOPLANTILAR")),
-          Expanded(
-            child: ListView.builder(
-              itemCount: 8,
 
-            ),
-          ),
-        ],
-      )),
-    );*/
   }
 
   Widget listItem(int index, streamSnapshot) {
@@ -71,7 +68,10 @@ class _ReminderPageState extends State<ReminderPage> {
       elevation: 20,
       margin: EdgeInsets.all(10),
       child: Container(
-        width: MediaQuery.of(context).size.width,
+        width: MediaQuery
+            .of(context)
+            .size
+            .width,
         height: 200,
         child: Column(children: [
           Container(
@@ -90,8 +90,9 @@ class _ReminderPageState extends State<ReminderPage> {
                 ),
                 Container(
                   child: CountdownTimer(
-
-                    endTime: dateParse(streamSnapshot.data?.docs[index]['tarihsaat']).millisecondsSinceEpoch,
+                    endTime:
+                    dateParse(streamSnapshot.data?.docs[index]['tarihsaat'])
+                        .millisecondsSinceEpoch,
                     textStyle: TextStyle(fontSize: 12, color: Colors.white),
                   ),
                 ),
@@ -105,113 +106,141 @@ class _ReminderPageState extends State<ReminderPage> {
             ),
           ),
           Container(
-              // etiketlerin olduğu
+            // etiketlerin olduğu
               child: Row(children: [
-            Column(children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Container(
-                    width: MediaQuery.of(context).size.width * 0.9,
-                    child: Row(children: [
-                      Container(
-                        width: MediaQuery.of(context).size.width * 0.3,
-                        child: Text(
-                          'Toplantı Konusu: ',
-                          textAlign: TextAlign.left,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                          )
-                        ),
-                      ),
-                      Container(
-                          width: MediaQuery.of(context).size.width * 0.6,
-                          child: Text(
-                            streamSnapshot.data?.docs[index]['konu'],
-                            textAlign: TextAlign.left,
-
-                          )),
-                    ])),
-              ),
-              Container(
-                decoration: BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(color: Colors.red,width: 3.0),
+                Column(children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Container(
+                        width: MediaQuery
+                            .of(context)
+                            .size
+                            .width * 0.9,
+                        child: Row(children: [
+                          Container(
+                            width: MediaQuery
+                                .of(context)
+                                .size
+                                .width * 0.3,
+                            child: Text('Toplantı Konusu: ',
+                                textAlign: TextAlign.left,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                )),
+                          ),
+                          Container(
+                              width: MediaQuery
+                                  .of(context)
+                                  .size
+                                  .width * 0.6,
+                              child: Text(
+                                streamSnapshot.data?.docs[index]['konu'],
+                                textAlign: TextAlign.left,
+                              )),
+                        ])),
                   ),
-                ),
-              ),
-              Container(
-                  width: MediaQuery.of(context).size.width * 0.9,
-                  child: Row(children: [
-                    Container(
-                        width: MediaQuery.of(context).size.width * 0.3,
-                        child: Text('Toplantı Zamanı: ',
-                            textAlign: TextAlign.left,
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                            ))),
-                    Container(
-                        width: MediaQuery.of(context).size.width * 0.6,
-                        child: Text(
-                          streamSnapshot.data?.docs[index]['tarihsaat'],
-                          textAlign: TextAlign.left,
-                        )),
-                  ])),
-                 new Divider(
-                height: 20,
-                thickness: 5,
-                indent: 20,
-                endIndent: 0,
-                color: Colors.black,
-              ),
-              Container(
-                  width: MediaQuery.of(context).size.width * 0.9,
-                  child: Row(children: [
-                    Container(
-                        width: MediaQuery.of(context).size.width * 0.3,
-                        child: Text('Toplantı Mekanı: ',
-                            textAlign: TextAlign.left,
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                            ))),
-                    Container(
-                        width: MediaQuery.of(context).size.width * 0.6,
-                        child: Text(
-                          streamSnapshot.data?.docs[index]['mekan'],
-                          textAlign: TextAlign.left,
-                        )),
-                  ])),
-              const Divider(
-                height: 20,
-                thickness: 5,
-                indent: 20,
-                endIndent: 0,
-                color: Colors.black,
-              ),
-              Container(
-
-                  width: MediaQuery.of(context).size.width * 0.9,
-                  child: Row(children: [
-
-                    Container(
-                      width: MediaQuery.of(context).size.width * 0.3,
-                      child: Text(
-                        'Departman: ',
-                        textAlign: TextAlign.left,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                          )
+                  Container(
+                    decoration: BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(color: Colors.red, width: 3.0),
                       ),
                     ),
-                    Container(
-                        width: MediaQuery.of(context).size.width * 0.6,
-                        child: Text(
-                          streamSnapshot.data?.docs[index]['departman'],
-                          textAlign: TextAlign.left,
-                        )),
-                  ]))
-            ]),
-
-          ])),
+                  ),
+                  Container(
+                      width: MediaQuery
+                          .of(context)
+                          .size
+                          .width * 0.9,
+                      child: Row(children: [
+                        Container(
+                            width: MediaQuery
+                                .of(context)
+                                .size
+                                .width * 0.3,
+                            child: Text('Toplantı Zamanı: ',
+                                textAlign: TextAlign.left,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ))),
+                        Container(
+                            width: MediaQuery
+                                .of(context)
+                                .size
+                                .width * 0.6,
+                            child: Text(
+                              streamSnapshot.data?.docs[index]['tarihsaat'],
+                              textAlign: TextAlign.left,
+                            )),
+                      ])),
+                  new Divider(
+                    height: 20,
+                    thickness: 5,
+                    indent: 20,
+                    endIndent: 0,
+                    color: Colors.black,
+                  ),
+                  Container(
+                      width: MediaQuery
+                          .of(context)
+                          .size
+                          .width * 0.9,
+                      child: Row(children: [
+                        Container(
+                            width: MediaQuery
+                                .of(context)
+                                .size
+                                .width * 0.3,
+                            child: Text('Toplantı Mekanı: ',
+                                textAlign: TextAlign.left,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ))),
+                        Container(
+                            width: MediaQuery
+                                .of(context)
+                                .size
+                                .width * 0.6,
+                            child: Text(
+                              streamSnapshot.data?.docs[index]['mekan'],
+                              textAlign: TextAlign.left,
+                            )),
+                      ])),
+                  const Divider(
+                    height: 20,
+                    thickness: 5,
+                    indent: 20,
+                    endIndent: 0,
+                    color: Colors.black,
+                  ),
+                  Container(
+                      width: MediaQuery
+                          .of(context)
+                          .size
+                          .width * 0.9,
+                      child: Row(children: [
+                        Container(
+                          width: MediaQuery
+                              .of(context)
+                              .size
+                              .width * 0.3,
+                          child: Text('Departman: ',
+                              textAlign: TextAlign.left,
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                              )),
+                        ),
+                        Container(
+                            width: MediaQuery
+                                .of(context)
+                                .size
+                                .width * 0.6,
+                            child: Text(
+                              streamSnapshot.data?.docs[index]['departman'],
+                              textAlign: TextAlign.left,
+                            )),
+                      ]))
+                ]),
+              ])),
         ]),
       ),
     );
@@ -225,8 +254,28 @@ class _ReminderPageState extends State<ReminderPage> {
     return true;
   }
 
-  DateTime dateParse(String date){
+  DateTime dateParse(String date) {
     var parsedDate = DateFormat("dd-M-yyyy hh:mm:ss").parse(date);
     return parsedDate;
   }
+
+  Future<bool> adminKontrol() async {
+
+    var email = FirebaseAuth.instance.currentUser?.email.toString();
+    final QuerySnapshot result = await FirebaseFirestore.instance.collection(
+        'admins').get();
+    final List <DocumentSnapshot> documents = result.docs;
+
+    documents.forEach((snapshot) {
+      if (snapshot.get('email') == email) {
+        adminControl = true;
+        setState(() {
+
+        });
+      }
+    }
+    );
+    return false;
+  }
+
 }

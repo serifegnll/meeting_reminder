@@ -1,10 +1,11 @@
-
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:meetingreminder_project/add_user.dart';
 import 'package:meetingreminder_project/reminder_page.dart';
 import 'firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'add_meeting.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -12,21 +13,21 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   runApp(MyApp());
+
 }
 
 class MyApp extends StatelessWidget {
-
   FirebaseMessaging messaging = FirebaseMessaging.instance;
 
   @override
   Widget build(BuildContext context) {
     messaging.subscribeToTopic("messaging");
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        appBarTheme: AppBarTheme(
-          color: const Color.fromARGB(255, 60, 60, 60),
-        )
-      ),
+          appBarTheme: AppBarTheme(
+        color: const Color.fromARGB(255, 60, 60, 60),
+      )),
       home: LoginPage(),
     );
   }
@@ -51,6 +52,7 @@ class _LoginPageState extends State<LoginPage> {
   void fcmSubscribe() {
     firebaseMessaging.subscribeToTopic('TopicToListen');
   }
+
   @override
   void initState() {
     fcmSubscribe();
@@ -96,12 +98,17 @@ class _LoginPageState extends State<LoginPage> {
                       controller: myEmailController,
                       decoration: InputDecoration(
                           border: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.black, width: 2.0),
+                            borderSide:
+                                BorderSide(color: Colors.black, width: 2.0),
                           ),
                           enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.black, width: 2.0),),
-                          focusedBorder:OutlineInputBorder(
-                            borderSide: const BorderSide(color: Colors.grey, width: 2.0),),
+                            borderSide:
+                                BorderSide(color: Colors.black, width: 2.0),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: const BorderSide(
+                                color: Colors.grey, width: 2.0),
+                          ),
                           labelText: 'Email',
                           hintText: 'Enter your e-mail adress'))),
               Padding(
@@ -116,9 +123,12 @@ class _LoginPageState extends State<LoginPage> {
                         borderSide: BorderSide(color: Colors.black, width: 2.0),
                       ),
                       enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.black, width: 2.0),),
-                      focusedBorder:OutlineInputBorder(
-                        borderSide: const BorderSide(color: Colors.grey, width: 2.0),),
+                        borderSide: BorderSide(color: Colors.black, width: 2.0),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide:
+                            const BorderSide(color: Colors.grey, width: 2.0),
+                      ),
                       labelText: 'Password',
                       hintText: 'Password'),
                 ),
@@ -139,7 +149,27 @@ class _LoginPageState extends State<LoginPage> {
                             MaterialPageRoute(
                                 builder: (context) => ReminderPage()));
                       } else {
-                        //buraya error mesajını pop up gibi bişeyle götermem lazım
+                        showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+
+                                  title: new Text("Giriş Yapılamadı"),
+                                  content: new Text(
+                                      "Lütfen giriş bilgilierinizi kontrol ediniz."),
+                                  actions: <Widget>[
+                                    // usually buttons at the bottom of the dialog
+                                    ElevatedButton(
+                                      style: ButtonStyle(
+                                        backgroundColor: MaterialStateProperty.all(Colors.black),
+                                      ),
+                                      child: new Text("Tamam"),
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                    ),
+                                  ]);
+                            });
                       }
                     },
                     child: Text("GİRİŞ YAP")),
@@ -152,6 +182,10 @@ class _LoginPageState extends State<LoginPage> {
                       backgroundColor: MaterialStateProperty.all(Colors.black),
                     ),
                     onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => AddUserPage()));
                       _email = myEmailController.text;
                       _password = myPassController.text;
                       createUserEmailAndPassword();
