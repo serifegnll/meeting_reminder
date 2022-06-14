@@ -41,6 +41,7 @@ dependencies:
   flutter_countdown_timer: ^4.1.0
   http: ^0.13.4
   firebase_messaging: ^11.4.1
+  timeago: ^3.2.2
   
 
 dev_dependencies:
