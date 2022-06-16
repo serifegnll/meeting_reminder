@@ -85,7 +85,6 @@ class _AddUserPageState extends State<AddUserPage> {
                           MaterialPageRoute(builder: (context) => LoginPage()));
 
 
-
                     },
                     child: Text("KAYDOL"))
               ]),

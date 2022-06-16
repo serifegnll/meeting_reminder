@@ -1,10 +1,12 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:meetingreminder_project/SharedPrefFayda.dart';
 import 'package:meetingreminder_project/add_user.dart';
 import 'package:meetingreminder_project/reminder_page.dart';
 import 'firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'add_meeting.dart';
 
 void main() async {
@@ -12,8 +14,8 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(MyApp());
 
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -26,9 +28,11 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
           appBarTheme: AppBarTheme(
-        color: const Color.fromARGB(255, 60, 60, 60),
+        color: Colors.black,
       )),
-      home: LoginPage(),
+      home: SharedPrefFayda.getEmailPref() == null
+          ? LoginPage()
+          : ReminderPage(),
     );
   }
 }
@@ -80,44 +84,22 @@ class _LoginPageState extends State<LoginPage> {
         //backgroundColor: Colors.lightBlueAccent,
         appBar: AppBar(title: Text('Giriş Yap')), //ustteki bar
         body: Center(
-            child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-              Padding(
-                  padding: EdgeInsets.only(top: 30),
-                  child: Center(
-                    child: Text(
-                      "Hoşgeldiniz!\n", //karşılama yazısı
-                      style: TextStyle(color: Colors.black, fontSize: 30),
-                    ),
-                  )),
-              Padding(
-                  //email kısmı
-                  padding: EdgeInsets.symmetric(horizontal: 15),
-                  child: TextField(
-                      controller: myEmailController,
-                      decoration: InputDecoration(
-                          border: OutlineInputBorder(
-                            borderSide:
-                                BorderSide(color: Colors.black, width: 2.0),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide:
-                                BorderSide(color: Colors.black, width: 2.0),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(
-                                color: Colors.grey, width: 2.0),
-                          ),
-                          labelText: 'Email',
-                          hintText: 'Enter your e-mail adress'))),
-              Padding(
-                //password kısmı
-                padding: const EdgeInsets.only(
-                    left: 15.0, right: 15.0, top: 15, bottom: 0),
-                child: TextField(
-                  controller: myPassController,
-                  obscureText: true,
+            child:
+                Column(mainAxisAlignment: MainAxisAlignment.center, children: <
+                    Widget>[
+          Padding(
+              padding: EdgeInsets.only(top: 30),
+              child: Center(
+                child: Text(
+                  "Hoşgeldiniz!\n", //karşılama yazısı
+                  style: TextStyle(color: Colors.black, fontSize: 30),
+                ),
+              )),
+          Padding(
+              //email kısmı
+              padding: EdgeInsets.symmetric(horizontal: 15),
+              child: TextField(
+                  controller: myEmailController,
                   decoration: InputDecoration(
                       border: OutlineInputBorder(
                         borderSide: BorderSide(color: Colors.black, width: 2.0),
@@ -129,70 +111,91 @@ class _LoginPageState extends State<LoginPage> {
                         borderSide:
                             const BorderSide(color: Colors.grey, width: 2.0),
                       ),
-                      labelText: 'Password',
-                      hintText: 'Password'),
+                      labelText: 'Email',
+                      hintText: 'E-mail adresinizi yazınız'))),
+          Padding(
+            //password kısmı
+            padding: const EdgeInsets.only(
+                left: 15.0, right: 15.0, top: 15, bottom: 0),
+            child: TextField(
+              controller: myPassController,
+              obscureText: true,
+              decoration: InputDecoration(
+                  border: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.black, width: 2.0),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.black, width: 2.0),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide:
+                        const BorderSide(color: Colors.grey, width: 2.0),
+                  ),
+                  labelText: 'Password',
+                  hintText: 'Şifrenizi giriniz'),
+            ),
+          ),
+          Padding(
+            // ******GİRİŞ YAP*****
+            padding: EdgeInsets.symmetric(horizontal: 15),
+            child: ElevatedButton(
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all(Colors.black),
                 ),
-              ),
-              Padding(
-                // ******GİRİŞ YAP*****
-                padding: EdgeInsets.symmetric(horizontal: 15),
-                child: ElevatedButton(
-                    style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all(Colors.black),
-                    ),
-                    onPressed: () async {
-                      _email = myEmailController.text;
-                      _password = myPassController.text;
-                      if (await loginUserEmailAndPassword() == 1) {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => ReminderPage()));
-                      } else {
-                        showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return AlertDialog(
+                onPressed: () async {
+                  _email = myEmailController.text;
+                  _password = myPassController.text;
+                  SharedPrefFayda.prefKaydet(_email);
 
-                                  title: new Text("Giriş Yapılamadı"),
-                                  content: new Text(
-                                      "Lütfen giriş bilgilierinizi kontrol ediniz."),
-                                  actions: <Widget>[
-                                    // usually buttons at the bottom of the dialog
-                                    ElevatedButton(
-                                      style: ButtonStyle(
-                                        backgroundColor: MaterialStateProperty.all(Colors.black),
-                                      ),
-                                      child: new Text("Tamam"),
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                      },
-                                    ),
-                                  ]);
-                            });
-                      }
-                    },
-                    child: Text("GİRİŞ YAP")),
-              ),
-              Padding(
-                //*******KAYDOL*********
-                padding: EdgeInsets.symmetric(horizontal: 15),
-                child: ElevatedButton(
-                    style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all(Colors.black),
-                    ),
-                    onPressed: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => AddUserPage()));
-                      _email = myEmailController.text;
-                      _password = myPassController.text;
-                      createUserEmailAndPassword();
-                    },
-                    child: Text("KAYDOL")),
-              ),
-            ])));
+                  if (await loginUserEmailAndPassword() == 1) {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => ReminderPage()));
+                  } else {
+                    showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                              title: new Text("Giriş Yapılamadı"),
+                              content: new Text(
+                                  "Lütfen giriş bilgilierinizi kontrol ediniz."),
+                              actions: <Widget>[
+                                // usually buttons at the bottom of the dialog
+                                ElevatedButton(
+                                  style: ButtonStyle(
+                                    backgroundColor:
+                                        MaterialStateProperty.all(Colors.black),
+                                  ),
+                                  child: new Text("Tamam"),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                ),
+                              ]);
+                        });
+                  }
+                },
+                child: Text("GİRİŞ YAP")),
+          ),
+          Padding(
+            //*******KAYDOL*********
+            padding: EdgeInsets.symmetric(horizontal: 15),
+            child: ElevatedButton(
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all(Colors.black),
+                ),
+                onPressed: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => AddUserPage()));
+                  _email = myEmailController.text;
+                  _password = myPassController.text;
+
+                  createUserEmailAndPassword();
+                },
+                child: Text("KAYDOL")),
+          ),
+        ])));
   }
 
   createUserEmailAndPassword() async {

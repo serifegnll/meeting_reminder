@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_countdown_timer/countdown_timer_controller.dart';
 import 'package:flutter_countdown_timer/flutter_countdown_timer.dart';
+import 'package:meetingreminder_project/SharedPrefFayda.dart';
 import 'package:meetingreminder_project/expired_meetings.dart';
 import 'package:meetingreminder_project/viewModel.dart';
 import 'add_meeting.dart';
@@ -22,16 +23,16 @@ class ReminderPage extends StatefulWidget {
 class _ReminderPageState extends State<ReminderPage> {
   var adminControl = false;
   FirebaseFirestore firestore = FirebaseFirestore.instance;
+  var email;
+
 
   @override
   void initState() {
+    SharedPrefFayda.getEmailPref().then((value) => email=value );
     var oneSecond = const Duration(seconds: 20);
     Timer.periodic(oneSecond, (timer) async {
-setState(() {
-
-});
+      setState(() {});
     });
-
     adminKontrol();
     super.initState();
   }
@@ -41,37 +42,71 @@ setState(() {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Toplantılar"),
-        actions: [
-          adminControl == true
-              ? IconButton(
-              onPressed: () async {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const AddMeetingPage()));
-              },
-              icon: const Icon(Icons.add))
-              : Container(),
-          ElevatedButton(
-              style: ButtonStyle(
-                backgroundColor:
-                MaterialStateProperty.all(Color.fromARGB(255, 60, 60, 60)),
-              ),
-              onPressed: () async {
+      ),
+
+      floatingActionButton:Visibility(
+        visible: adminControl == true,
+        child: FloatingActionButton(
+          onPressed: () {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => const AddMeetingPage()));
+          },
+          child: Icon(Icons.add),
+          backgroundColor: Colors.black, //icon inside button
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      bottomNavigationBar: BottomAppBar(
+        color: Colors.black,
+        shape: CircularNotchedRectangle(),
+        //shape of notch
+        notchMargin: 5,
+        //notch margin between floating button and bottom appbar
+        child: Row(
+          //children inside bottom appbar
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => ExpiredPage()));
+                },
+                label: Text('Geçmiş Toplantılar',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12)),
+                icon: Icon(Icons.alarm_on),
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all(Colors.black),
+                )),
+            ElevatedButton.icon(
+              onPressed: () {
                 Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => ExpiredPage()));
+                    MaterialPageRoute(builder: (context) => ReminderPage()));
               },
-              child: Text('Geçmiş Toplantılar',
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)))
-        ],
+              label: Text("Gelecek toplantılar",
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12)),
+              icon: Icon(Icons.alarm),
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all(Colors.black),
+              ),
+            )
+          ],
+        ),
+
       ),
       body: StreamBuilder(
           stream:
-          FirebaseFirestore.instance.collection('toplantilar').snapshots(),
+              FirebaseFirestore.instance.collection('toplantilar').snapshots(),
           builder: (context, AsyncSnapshot<QuerySnapshot> streamSnapshot) {
             int a = streamSnapshot.data?.docs.length as int;
             for (var i = 0; i <= a; i++) {
-               toplantiKontrol(streamSnapshot, i);
+              toplantiKontrol(streamSnapshot, i);
             }
 
             return ListView.builder(
@@ -93,10 +128,7 @@ setState(() {
       elevation: 20,
       margin: EdgeInsets.all(10),
       child: Container(
-        width: MediaQuery
-            .of(context)
-            .size
-            .width,
+        width: MediaQuery.of(context).size.width,
         height: 200,
         child: Column(children: [
           Container(
@@ -105,20 +137,17 @@ setState(() {
             padding: EdgeInsets.all(10),
             child: Column(
               children: [
-                Text(
-                    streamSnapshot.data?.docs[index]['baslik'].toUpperCase(),
+                Text(streamSnapshot.data?.docs[index]['baslik'].toUpperCase(),
                     style: TextStyle(
-                        color: Colors.red,
+                        color: Colors.white,
                         fontSize: 15,
-                        fontWeight: FontWeight.bold)
-                ),
+                        fontWeight: FontWeight.bold)),
                 Container(
                   child: CountdownTimer(
-                    endTime: dateParse(
-                        streamSnapshot.data?.docs[index]['tarihsaat'])
-                        .millisecondsSinceEpoch,
-                    textStyle:
-                    TextStyle(fontSize: 12, color: Colors.white),
+                    endTime:
+                        dateParse(streamSnapshot.data?.docs[index]['tarihsaat'])
+                            .millisecondsSinceEpoch,
+                    textStyle: TextStyle(fontSize: 12, color: Colors.white),
                     //onEnd: onEnd(index, streamSnapshot)
                   ),
                 ),
@@ -132,141 +161,105 @@ setState(() {
             ),
           ),
           Container(
-            // etiketlerin olduğu
+              // etiketlerin olduğu
               child: Row(children: [
-                Column(children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Container(
-                        width: MediaQuery
-                            .of(context)
-                            .size
-                            .width * 0.9,
-                        child: Row(children: [
-                          Container(
-                            width: MediaQuery
-                                .of(context)
-                                .size
-                                .width * 0.3,
-                            child: Text('Toplantı Konusu: ',
-                                textAlign: TextAlign.left,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                )),
-                          ),
-                          Container(
-                              width: MediaQuery
-                                  .of(context)
-                                  .size
-                                  .width * 0.6,
-                              child: Text(
-                                streamSnapshot.data?.docs[index]['konu'],
-                                textAlign: TextAlign.left,
-                              )),
-                        ])),
-                  ),
-                  Container(
-                    decoration: BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(color: Colors.red, width: 3.0),
+            Column(children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Container(
+                    width: MediaQuery.of(context).size.width * 0.9,
+                    child: Row(children: [
+                      Container(
+                        width: MediaQuery.of(context).size.width * 0.3,
+                        child: Text('Toplantı Konusu: ',
+                            textAlign: TextAlign.left,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                            )),
                       ),
+                      Container(
+                          width: MediaQuery.of(context).size.width * 0.6,
+                          child: Text(
+                            streamSnapshot.data?.docs[index]['konu'],
+                            textAlign: TextAlign.left,
+                          )),
+                    ])),
+              ),
+              Container(
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(color: Colors.red, width: 3.0),
+                  ),
+                ),
+              ),
+              Container(
+                  width: MediaQuery.of(context).size.width * 0.9,
+                  child: Row(children: [
+                    Container(
+                        width: MediaQuery.of(context).size.width * 0.3,
+                        child: Text('Toplantı Zamanı: ',
+                            textAlign: TextAlign.left,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ))),
+                    Container(
+                        width: MediaQuery.of(context).size.width * 0.6,
+                        child: Text(
+                          streamSnapshot.data?.docs[index]['tarihsaat'],
+                          textAlign: TextAlign.left,
+                        )),
+                  ])),
+              new Divider(
+                height: 20,
+                thickness: 5,
+                indent: 20,
+                endIndent: 0,
+                color: Colors.black,
+              ),
+              Container(
+                  width: MediaQuery.of(context).size.width * 0.9,
+                  child: Row(children: [
+                    Container(
+                        width: MediaQuery.of(context).size.width * 0.3,
+                        child: Text('Toplantı Mekanı: ',
+                            textAlign: TextAlign.left,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ))),
+                    Container(
+                        width: MediaQuery.of(context).size.width * 0.6,
+                        child: Text(
+                          streamSnapshot.data?.docs[index]['mekan'],
+                          textAlign: TextAlign.left,
+                        )),
+                  ])),
+              const Divider(
+                height: 20,
+                thickness: 5,
+                indent: 20,
+                endIndent: 0,
+                color: Colors.black,
+              ),
+              Container(
+                  width: MediaQuery.of(context).size.width * 0.9,
+                  child: Row(children: [
+                    Container(
+                      width: MediaQuery.of(context).size.width * 0.3,
+                      child: Text('Departman: ',
+                          textAlign: TextAlign.left,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                          )),
                     ),
-                  ),
-                  Container(
-                      width: MediaQuery
-                          .of(context)
-                          .size
-                          .width * 0.9,
-                      child: Row(children: [
-                        Container(
-                            width: MediaQuery
-                                .of(context)
-                                .size
-                                .width * 0.3,
-                            child: Text('Toplantı Zamanı: ',
-                                textAlign: TextAlign.left,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                ))),
-                        Container(
-                            width: MediaQuery
-                                .of(context)
-                                .size
-                                .width * 0.6,
-                            child: Text(
-                              streamSnapshot.data?.docs[index]['tarihsaat'],
-                              textAlign: TextAlign.left,
-                            )),
-                      ])),
-                  new Divider(
-                    height: 20,
-                    thickness: 5,
-                    indent: 20,
-                    endIndent: 0,
-                    color: Colors.black,
-                  ),
-                  Container(
-                      width: MediaQuery
-                          .of(context)
-                          .size
-                          .width * 0.9,
-                      child: Row(children: [
-                        Container(
-                            width: MediaQuery
-                                .of(context)
-                                .size
-                                .width * 0.3,
-                            child: Text('Toplantı Mekanı: ',
-                                textAlign: TextAlign.left,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                ))),
-                        Container(
-                            width: MediaQuery
-                                .of(context)
-                                .size
-                                .width * 0.6,
-                            child: Text(
-                              streamSnapshot.data?.docs[index]['mekan'],
-                              textAlign: TextAlign.left,
-                            )),
-                      ])),
-                  const Divider(
-                    height: 20,
-                    thickness: 5,
-                    indent: 20,
-                    endIndent: 0,
-                    color: Colors.black,
-                  ),
-                  Container(
-                      width: MediaQuery
-                          .of(context)
-                          .size
-                          .width * 0.9,
-                      child: Row(children: [
-                        Container(
-                          width: MediaQuery
-                              .of(context)
-                              .size
-                              .width * 0.3,
-                          child: Text('Departman: ',
-                              textAlign: TextAlign.left,
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                              )),
-                        ),
-                        Container(
-                            width: MediaQuery
-                                .of(context)
-                                .size
-                                .width * 0.6,
-                            child: Text(
-                              streamSnapshot.data?.docs[index]['departman'],
-                              textAlign: TextAlign.left,
-                            )),
-                      ]))
-                ]),
-              ])),
+                    Container(
+                        width: MediaQuery.of(context).size.width * 0.6,
+                        child: Text(
+                          streamSnapshot.data?.docs[index]['departman'],
+                          textAlign: TextAlign.left,
+                        )),
+                  ]))
+            ]),
+          ])),
         ]),
       ),
     );
@@ -288,7 +281,7 @@ setState(() {
   Future<bool> adminKontrol() async {
     var email = FirebaseAuth.instance.currentUser?.email.toString();
     final QuerySnapshot result =
-    await FirebaseFirestore.instance.collection('admins').get();
+        await FirebaseFirestore.instance.collection('admins').get();
     final List<DocumentSnapshot> documents = result.docs;
 
     documents.forEach((snapshot) {
@@ -306,17 +299,14 @@ setState(() {
 
   bitenToplantiyiAl(index, streamSnapshot) async {
     Map<String, dynamic> eklenecekToplanti = <String, dynamic>{};
-    /*final QuerySnapshot result =
-        await FirebaseFirestore.instance.collection('toplantilar').get();
-    final List<DocumentSnapshot> documents = result.docs;*/
-// TODO: çalıştırma bunu 3847308473 tane ekliyo
+
     eklenecekToplanti['baslik'] = streamSnapshot.data?.docs[index]['baslik'];
     eklenecekToplanti['konu'] = streamSnapshot.data?.docs[index]['konu'];
     eklenecekToplanti['mekan'] = streamSnapshot.data?.docs[index]['mekan'];
     eklenecekToplanti['departman'] =
-    streamSnapshot.data?.docs[index]['departman'];
+        streamSnapshot.data?.docs[index]['departman'];
     eklenecekToplanti['tarihsaat'] =
-    streamSnapshot.data?.docs[index]['tarihsaat'];
+        streamSnapshot.data?.docs[index]['tarihsaat'];
 
     await bitenToplantiyiSil(index, streamSnapshot);
     await firestore.collection('expiredtoplanti').add(eklenecekToplanti);
@@ -327,24 +317,21 @@ setState(() {
   bitenToplantiyiSil(int index, streamSnapshot) async {
     await FirebaseFirestore.instance
         .collection("toplantilar")
-        .doc(streamSnapshot.data?.docs[index].id).delete();
+        .doc(streamSnapshot.data?.docs[index].id)
+        .delete();
   }
 
   Future<bool> toplantiBitisKontrol(streamSnapshot, index) async {
-    if (dateParse(
-        streamSnapshot.data?.docs[index]['tarihsaat'])
-        .millisecondsSinceEpoch == DateTime
-        .now()
-        .millisecondsSinceEpoch || dateParse(
-        streamSnapshot.data?.docs[index]['tarihsaat'])
-        .millisecondsSinceEpoch < DateTime
-        .now()
-        .millisecondsSinceEpoch) {
-       await bitenToplantiyiAl(index, streamSnapshot);
+    if (dateParse(streamSnapshot.data?.docs[index]['tarihsaat'])
+                .millisecondsSinceEpoch ==
+            DateTime.now().millisecondsSinceEpoch ||
+        dateParse(streamSnapshot.data?.docs[index]['tarihsaat'])
+                .millisecondsSinceEpoch <
+            DateTime.now().millisecondsSinceEpoch) {
+      await bitenToplantiyiAl(index, streamSnapshot);
 
       return true;
-    }
-    else {
+    } else {
       return false;
     }
   }
