@@ -240,7 +240,7 @@ class AddMeetingPageState extends State<AddMeetingPage> {
                 child: new Text("Geçmiş Toplantılar Sayfasına Git"),
                 onPressed: () {
                   Navigator.of(context).pop();
-                  Navigator.push(context,
+                  Navigator.pushReplacement(context,
                       MaterialPageRoute(builder: (context) => ExpiredPage()));
                 },
               ),
@@ -283,7 +283,7 @@ class AddMeetingPageState extends State<AddMeetingPage> {
                 child: new Text("Listeye Dön"),
                 onPressed: () {
                   Navigator.of(context).pop();
-                  Navigator.push(
+                  Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
                           builder: (context) => const ReminderPage()));

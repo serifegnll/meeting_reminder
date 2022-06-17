@@ -81,7 +81,7 @@ class _AddUserPageState extends State<AddUserPage> {
                       email = emailController.text;
                       password = sifreController.text;
                       userEkle();
-                      Navigator.push(context,
+                      Navigator.pushReplacement(context,
                           MaterialPageRoute(builder: (context) => LoginPage()));
 
 

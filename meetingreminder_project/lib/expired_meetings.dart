@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_countdown_timer/flutter_countdown_timer.dart';
+import 'package:meetingreminder_project/reminder_page.dart';
 import 'package:timeago/timeago.dart';
 
 class ExpiredPage extends StatefulWidget {
@@ -14,7 +15,15 @@ class _ExpiredPageState extends State<ExpiredPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Toplantılar"),
+        automaticallyImplyLeading: true,
+        title: const Text(" Geçmiş Toplantılar"),
+        /*leading: BackButton(
+          color: Colors.white,
+          onPressed: (){
+            Navigator.pushReplacement(context,
+                MaterialPageRoute(builder: (context) => ReminderPage()));
+          },
+        ),*/
       ),
       body: StreamBuilder(
           stream: FirebaseFirestore.instance

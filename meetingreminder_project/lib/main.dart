@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -30,6 +31,7 @@ class MyApp extends StatelessWidget {
           appBarTheme: AppBarTheme(
         color: Colors.black,
       )),
+      
       home: SharedPrefFayda.getEmailPref() == null
           ? LoginPage()
           : ReminderPage(),
@@ -82,7 +84,8 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
         //backgroundColor: Colors.lightBlueAccent,
-        appBar: AppBar(title: Text('Giriş Yap')), //ustteki bar
+        appBar: AppBar(title: Text('Giriş Yap'),automaticallyImplyLeading: false,),
+
         body: Center(
             child:
                 Column(mainAxisAlignment: MainAxisAlignment.center, children: <
@@ -145,10 +148,11 @@ class _LoginPageState extends State<LoginPage> {
                 onPressed: () async {
                   _email = myEmailController.text;
                   _password = myPassController.text;
-                  SharedPrefFayda.prefKaydet(_email);
+                  SharedPrefFayda.prefEmailKaydet(_email);
 
                   if (await loginUserEmailAndPassword() == 1) {
-                    Navigator.push(
+                    //SharedPrefFayda.prefEmailKaydet(FirebaseAuth.instance.currentUser?.email.toString());
+                    Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
                             builder: (context) => ReminderPage()));
@@ -186,7 +190,7 @@ class _LoginPageState extends State<LoginPage> {
                   backgroundColor: MaterialStateProperty.all(Colors.black),
                 ),
                 onPressed: () {
-                  Navigator.push(context,
+                  Navigator.pushReplacement(context,
                       MaterialPageRoute(builder: (context) => AddUserPage()));
                   _email = myEmailController.text;
                   _password = myPassController.text;
