@@ -26,12 +26,12 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     messaging.subscribeToTopic("messaging");
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
+      debugShowCheckedModeBanner: false, // debug yazısını siliyor
       theme: ThemeData(
           appBarTheme: AppBarTheme(
         color: Colors.black,
-      )),
-      
+      )
+      ),
       home: SharedPrefFayda.getEmailPref() == null
           ? LoginPage()
           : ReminderPage(),
@@ -83,8 +83,9 @@ class _LoginPageState extends State<LoginPage> {
 
   Widget build(BuildContext context) {
     return Scaffold(
+
         //backgroundColor: Colors.lightBlueAccent,
-        appBar: AppBar(title: Text('Giriş Yap'),automaticallyImplyLeading: false,),
+        appBar: AppBar(title: Text('Giriş Yap')),
 
         body: Center(
             child:

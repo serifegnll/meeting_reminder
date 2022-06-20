@@ -1,25 +1,25 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_countdown_timer/flutter_countdown_timer.dart';
-import 'package:meetingreminder_project/SharedPrefFayda.dart';
 import 'package:meetingreminder_project/add_meeting.dart';
-import 'package:meetingreminder_project/reminder_page.dart';
-import 'package:timeago/timeago.dart';
 
-class ExpiredPage extends StatefulWidget {
+class DraftPage extends StatefulWidget {
   @override
-  _ExpiredPageState createState() => _ExpiredPageState();
+  _DraftPageState createState() => _DraftPageState();
 }
 
-@override
-class _ExpiredPageState extends State<ExpiredPage> {
+class _DraftPageState extends State<DraftPage> {
+  final baslikController = new TextEditingController();
+  final konuController = new TextEditingController();
+  final tarihController = new TextEditingController();
+  final mekanController = new TextEditingController();
+  final departmanController = new TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: StreamBuilder(
-          stream: FirebaseFirestore.instance
-              .collection('expiredtoplanti')
-              .snapshots(),
+          stream: FirebaseFirestore.instance.collection('drafts').snapshots(),
           builder: (context, AsyncSnapshot<QuerySnapshot> streamSnapshot) {
             return ListView.builder(
                 itemCount: streamSnapshot.data?.docs.length,
@@ -49,11 +49,59 @@ class _ExpiredPageState extends State<ExpiredPage> {
             padding: EdgeInsets.all(10),
             child: Column(
               children: [
-                Text(streamSnapshot.data?.docs[index]['baslik'].toUpperCase(),
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold)),
+                InkWell(
+                    child: Text(
+                        streamSnapshot.data?.docs[index]['baslik']
+                            .toUpperCase(),
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold)),
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          // return object of type Dialog
+                          return AlertDialog(
+                            title: new Text("Taslağı Düzenle"),
+                            content: new Text(
+                                "Toplantıyı düzenlemeye devam etmek ister misiniz?"),
+                            actions: <Widget>[
+                              // usually buttons at the bottom of the dialog
+                              ElevatedButton(
+                                style: ButtonStyle(
+                                  backgroundColor:
+                                      MaterialStateProperty.all(Colors.black),
+                                ),
+                                child: new Text("Evet"),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                  Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              AddMeetingPage()));
+                                },
+                              ),
+                              ElevatedButton(
+                                style: ButtonStyle(
+                                  backgroundColor:
+                                      MaterialStateProperty.all(Colors.black),
+                                ),
+                                child: new Text("Hayır"),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                  Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => DraftPage()));
+                                },
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    })
               ],
             ),
             decoration: BoxDecoration(
@@ -166,5 +214,12 @@ class _ExpiredPageState extends State<ExpiredPage> {
         ]),
       ),
     );
+  }
+  taslakDuzenle(int index, streamSnapshot){
+    baslikController.text= streamSnapshot.data?.docs[index]['baslik'];
+    konuController.text= streamSnapshot.data?.docs[index]['konu'];
+    mekanController.text= streamSnapshot.data?.docs[index]['mekan'];
+    departmanController.text= streamSnapshot.data?.docs[index]['departman'];
+   
   }
 }
