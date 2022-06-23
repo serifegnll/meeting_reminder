@@ -67,6 +67,7 @@ class ReminderPageState extends State<ReminderPage> {
               title: const Text('Taslaklar'),
               onTap: () {
                 secilenSayfa = 'Taslaklar';
+                setState(() {});
               })
         ])),
         floatingActionButton: Visibility(
