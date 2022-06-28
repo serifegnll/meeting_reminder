@@ -6,6 +6,7 @@ import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:meetingreminder_project/custom_dialog.dart';
+import 'package:meetingreminder_project/drafts.dart';
 import 'package:meetingreminder_project/expired_meetings.dart';
 import 'package:meetingreminder_project/reminder_page.dart';
 import 'package:meetingreminder_project/viewModel.dart';
@@ -362,7 +363,7 @@ class AddMeetingPageState extends State<AddMeetingPage> {
                 onPressed: () {
                   Navigator.of(context).pop();
                   Navigator.pushReplacement(context,
-                      MaterialPageRoute(builder: (context) => ExpiredPage()));
+                      MaterialPageRoute(builder: (context) => DraftPage()));
                 },
               ),
 

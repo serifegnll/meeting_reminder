@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:meetingreminder_project/add_meeting.dart';
 import 'package:intl/intl.dart';
+import 'package:meetingreminder_project/taslakVeriler.dart';
 
 class DraftPage extends StatefulWidget {
   @override
@@ -11,16 +12,10 @@ class DraftPage extends StatefulWidget {
 }
 
 class _DraftPageState extends State<DraftPage> {
-  TextEditingController baslikController = TextEditingController();
-  TextEditingController konuController = TextEditingController();
-  TextEditingController tarihController = TextEditingController();
-  TextEditingController mekanController = TextEditingController();
-  TextEditingController departmanController = TextEditingController();
+  List<TextEditingController> controllers = [];
   bool _isEditingText = false;
   DateTime secilenTarih = DateTime.now();
   FirebaseFirestore firestore = FirebaseFirestore.instance;
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +33,7 @@ class _DraftPageState extends State<DraftPage> {
   }
 
   Widget listItem(int index, streamSnapshot) {
-    taslakDuzenle(index, streamSnapshot);
+    Veriler yenitaslak = taslakVeriGetir(index, streamSnapshot);
 
     return Card(
       color: Colors.blueGrey[60],
@@ -63,14 +58,18 @@ class _DraftPageState extends State<DraftPage> {
                   child: SizedBox(
                     height: 30,
                     width: 200,
-                    child: TextFormField(
+                    child: TextField(
                       enabled: _isEditingText,
-                      controller: baslikController,
+                      controller: controllers[0],
                       textAlign: TextAlign.center,
                       style: TextStyle(
                           color: Colors.white,
                           fontSize: 15,
                           fontWeight: FontWeight.bold),
+                      onChanged: (val) {
+                        controllers[0].text = val;
+                        yenitaslak.baslik = controllers[0].text;
+                      },
                     ),
                   ),
                 ),
@@ -85,7 +84,8 @@ class _DraftPageState extends State<DraftPage> {
                                 color: Colors.white,
                               ),
                               onPressed: () {
-                                taslakKaydet();
+                                taslakKaydet(index, streamSnapshot, yenitaslak);
+                                _isEditingText=false;
                               })),
                     ))
               ],
@@ -120,7 +120,11 @@ class _DraftPageState extends State<DraftPage> {
                         height: MediaQuery.of(context).size.height * 0.02,
                         child: TextFormField(
                           enabled: _isEditingText,
-                          controller: konuController,
+                          controller: controllers[1],
+                          onChanged: (val) {
+                            controllers[1].text = val;
+                            yenitaslak.konu = controllers[1].text;
+                          },
                         ),
                       )
                     ])),
@@ -145,9 +149,9 @@ class _DraftPageState extends State<DraftPage> {
                     Container(
                       width: MediaQuery.of(context).size.width * 0.6,
                       height: MediaQuery.of(context).size.height * 0.02,
-                      child: TextFormField(
+                      child: TextField(
                         enabled: _isEditingText,
-                        controller: tarihController,
+                        controller: controllers[2],
                         onTap: () {
                           FocusScope.of(context).requestFocus(new FocusNode());
                           DatePicker.showDateTimePicker(context,
@@ -156,13 +160,14 @@ class _DraftPageState extends State<DraftPage> {
                               maxTime: DateTime(2100, 6, 6, 0, 0),
                               onConfirm: (val) {
                             secilenTarih = val;
-                            tarihController.text =
+                            controllers[2].text =
                                 DateFormat('dd.MM.yyyy – kk:mm')
                                     .format(secilenTarih)
                                     .toString();
                             setState(() {
-                              tarihController;
+                              yenitaslak.zaman = controllers[2].text;
                             });
+
                           },
                               currentTime: DateTime.now(),
                               locale: LocaleType.tr);
@@ -190,12 +195,14 @@ class _DraftPageState extends State<DraftPage> {
                     Container(
                         width: MediaQuery.of(context).size.width * 0.6,
                         height: MediaQuery.of(context).size.height * 0.02,
-                        child: TextFormField(
-                          controller: mekanController,
+                        child: TextField(
                           enabled: _isEditingText,
-                          //initialValue: streamSnapshot.data?.docs[index]['mekan'] .toString(),
-
+                          controller: controllers[3],
                           textAlign: TextAlign.left,
+                          onChanged: (val) {
+                            controllers[3].text = val;
+                            yenitaslak.mekan = controllers[3].text;
+                          },
                         )),
                   ])),
               const Divider(
@@ -219,11 +226,14 @@ class _DraftPageState extends State<DraftPage> {
                     Container(
                         width: MediaQuery.of(context).size.width * 0.5,
                         height: MediaQuery.of(context).size.height * 0.02,
-                        child: TextFormField(
+                        child: TextField(
                           enabled: _isEditingText,
-                          controller: departmanController,
-                          // initialValue: streamSnapshot.data?.docs[index]['departman'].toString(),
+                          controller: controllers[4],
                           textAlign: TextAlign.left,
+                          onChanged: (val) {
+                            controllers[4].text = val;
+                            yenitaslak.departman = controllers[4].text;
+                          },
                         )),
                     Container(
                       width: MediaQuery.of(context).size.width * 0.1,
@@ -252,26 +262,47 @@ class _DraftPageState extends State<DraftPage> {
     );
   }
 
-  taslakDuzenle(int index, streamSnapshot) {
-    baslikController.text = streamSnapshot.data?.docs[index]['baslik'];
-    konuController.text = streamSnapshot.data?.docs[index]['konu'];
-    mekanController.text = streamSnapshot.data?.docs[index]['mekan'];
-    departmanController.text = streamSnapshot.data?.docs[index]['departman'];
-    tarihController.text=streamSnapshot.data?.docs[index]['departman'];
-
-
+  Veriler taslakVeriGetir(int index, streamSnapshot) {
+    // Veriler(streamSnapshot.data?.docs[index]['baslik'],streamSnapshot.data?.docs[index]['konu'],streamSnapshot.data?.docs[index]['mekan'],streamSnapshot.data?.docs[index]['tarihsaat'],streamSnapshot.data?.docs[index]['departman'] );
+    Veriler taslak = Veriler();
+    taslak.VerilerEkle(
+        streamSnapshot.data?.docs[index]['baslik'],
+        streamSnapshot.data?.docs[index]['konu'],
+        streamSnapshot.data?.docs[index]['mekan'],
+        streamSnapshot.data?.docs[index]['tarihsaat'],
+        streamSnapshot.data?.docs[index]['departman'],
+        streamSnapshot.data?.docs[index].reference.id);
+    controllers = controllerOlustur(taslak);
+    controllers[0].text = taslak.baslik;
+    controllers[1].text = taslak.konu;
+    controllers[3].text = taslak.mekan;
+    controllers[2].text = taslak.zaman;
+    controllers[4].text = taslak.departman;
+    return taslak;
   }
 
-  void taslakKaydet() async {
-    Map<String, dynamic> eklenecekToplanti = <String, dynamic>{};
-
-    eklenecekToplanti['baslik'] = baslikController.text;
-    eklenecekToplanti['departman'] = departmanController.text;
-    eklenecekToplanti['konu'] = konuController.text;
-    eklenecekToplanti['mekan'] = mekanController.text;
-    eklenecekToplanti['tarihsaat'] = tarihController.text;
-    await firestore.collection('drafts').add(eklenecekToplanti);
+  void taslakKaydet(int index, streamSnapshot, Veriler doc) async {
+    var collection = FirebaseFirestore.instance.collection('drafts');
+    collection.doc(doc.id).update({'baslik': doc.baslik});
+    collection.doc(doc.id).update({'konu': doc.konu});
+    collection.doc(doc.id).update({'mekan': doc.mekan});
+    collection.doc(doc.id).update({'tarihsaat': doc.zaman});
+    collection.doc(doc.id).update({'departman': doc.departman});
   }
 
-  controllerOlustur(int index) {}
+  List<TextEditingController> controllerOlustur(Veriler veri) {
+    TextEditingController baslikController = TextEditingController();
+    TextEditingController konuController = TextEditingController();
+    TextEditingController tarihController = TextEditingController();
+    TextEditingController mekanController = TextEditingController();
+    TextEditingController departmanController = TextEditingController();
+    List<TextEditingController> controllerList = [
+      baslikController,
+      konuController,
+      tarihController,
+      mekanController,
+      departmanController
+    ];
+    return controllerList;
+  }
 }
