@@ -6,5 +6,6 @@
 - Toplantı bilgileri görüntüleme (yer,zaman,mekan,konu, toplantıya katılacak olan departman)
 - Toplantı eklendiği zaman kullanıcılara toplantı detaylarının bildirim olarak gönderilmesi
 - Toplantıların listelenmesi, listeleme ekranında toplantıya kalan zamanın gösterilmesi
--  Geçmiş toplantılar sayfası (toplantı zamanı gelince bu sayfaya eklenir, ayrıca geçmiş tarihli toplantı eklenebilir)
+- Geçmiş toplantılar sayfası (toplantı zamanı gelince bu sayfaya eklenir, ayrıca geçmiş tarihli toplantı eklenebilir)
+- Taslak olarak kaydetme ve düzenleme seçeneği, taslak listeleme
 
