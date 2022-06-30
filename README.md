@@ -8,4 +8,5 @@
 - Toplantıların listelenmesi, listeleme ekranında toplantıya kalan zamanın gösterilmesi
 - Geçmiş toplantılar sayfası (toplantı zamanı gelince bu sayfaya eklenir, ayrıca geçmiş tarihli toplantı eklenebilir)
 - Taslak olarak kaydetme ve düzenleme seçeneği, taslak listeleme
+- Toplantı iptal etme ve bildirim işlemleri. (sadece admin yetkisi olanlar yapabilir)
 
