@@ -5,6 +5,7 @@ import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:meetingreminder_project/add_meeting.dart';
 import 'package:intl/intl.dart';
 import 'package:meetingreminder_project/taslakVeriler.dart';
+import 'package:meetingreminder_project/viewModel.dart';
 
 class DraftPage extends StatefulWidget {
   @override
@@ -13,9 +14,13 @@ class DraftPage extends StatefulWidget {
 
 class _DraftPageState extends State<DraftPage> {
   List<TextEditingController> controllers = [];
+  List<TextEditingController> changedController = [];
+  TextEditingController tarihController = TextEditingController(text: "");
   bool _isEditingText = false;
+  bool sayfaChanged = false;
   DateTime secilenTarih = DateTime.now();
   FirebaseFirestore firestore = FirebaseFirestore.instance;
+  String hedef = '';
 
   @override
   Widget build(BuildContext context) {
@@ -84,8 +89,55 @@ class _DraftPageState extends State<DraftPage> {
                                 color: Colors.white,
                               ),
                               onPressed: () {
-                                taslakKaydet(index, streamSnapshot, yenitaslak);
-                                _isEditingText=false;
+                                showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        title: new Text("Kaydet?"),
+                                        content: new Text(
+                                            'Taslak toplantı, toplantılar sayfasına eklenecek ve bildirim gönderilecektir. Devam etmek istiyor musunuz?'),
+                                        actions: <Widget>[
+                                          ElevatedButton(
+                                            style: ButtonStyle(
+                                              backgroundColor:
+                                                  MaterialStateProperty.all(
+                                                      Colors.black),
+                                            ),
+                                            child:
+                                                new Text("Taslaklara Kaydet"),
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                              yenitaslak.zaman =
+                                                  changedController[index].text;
+                                              taslakKaydet(yenitaslak);
+                                              _isEditingText = false;
+                                            },
+                                          ),
+                                          ElevatedButton(
+                                            style: ButtonStyle(
+                                              backgroundColor:
+                                                  MaterialStateProperty.all(
+                                                      Colors.black),
+                                            ),
+                                            child:
+                                                new Text("Toplantıyı Kaydet"),
+                                            onPressed: () async {
+                                              Navigator.of(context).pop();
+                                              yenitaslak.zaman =
+                                                  changedController[index].text;
+                                              taslagiToplantilaraKaydet(
+                                                  yenitaslak);
+                                              await FirebaseFirestore.instance
+                                                  .collection("drafts")
+                                                  .doc(streamSnapshot
+                                                      .data?.docs[index].id)
+                                                  .delete();
+                                              _isEditingText = false;
+                                            },
+                                          ),
+                                        ],
+                                      );
+                                    });
                               })),
                     ))
               ],
@@ -146,34 +198,99 @@ class _DraftPageState extends State<DraftPage> {
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                             ))),
-                    Container(
-                      width: MediaQuery.of(context).size.width * 0.6,
-                      height: MediaQuery.of(context).size.height * 0.02,
-                      child: TextField(
-                        enabled: _isEditingText,
-                        controller: controllers[2],
-                        onTap: () {
-                          FocusScope.of(context).requestFocus(new FocusNode());
-                          DatePicker.showDateTimePicker(context,
-                              showTitleActions: true,
-                              minTime: DateTime(2010, 3, 5, 0, 0),
-                              maxTime: DateTime(2100, 6, 6, 0, 0),
-                              onConfirm: (val) {
-                            secilenTarih = val;
-                            controllers[2].text =
-                                DateFormat('dd.MM.yyyy – kk:mm')
-                                    .format(secilenTarih)
-                                    .toString();
-                            setState(() {
-                              yenitaslak.zaman = controllers[2].text;
-                            });
+                    sayfaChanged == true
+                        ? Container(
+                            width: MediaQuery.of(context).size.width * 0.6,
+                            height: MediaQuery.of(context).size.height * 0.02,
+                            child: TextField(
+                              enabled: _isEditingText,
+                              controller: changedController[index],
+                              onTap: () {
+                                sayfaChanged = false;
 
-                          },
-                              currentTime: DateTime.now(),
-                              locale: LocaleType.tr);
-                        },
-                      ),
-                    ),
+                                setState(() {});
+                                FocusScope.of(context)
+                                    .requestFocus(new FocusNode());
+
+                                DatePicker.showDateTimePicker(context,
+                                    showTitleActions: true,
+                                    minTime: DateTime(2010, 3, 5, 0, 0),
+                                    maxTime: DateTime(2100, 6, 6, 0, 0),
+                                    onConfirm: (val) {
+                                  secilenTarih = val;
+                                  controllers[2].text =
+                                      DateFormat('dd.MM.yyyy – kk:mm')
+                                          .format(secilenTarih)
+                                          .toString();
+
+                                  changedController[index].text =
+                                      DateFormat('dd.MM.yyyy – kk:mm')
+                                          .format(secilenTarih)
+                                          .toString();
+                                  yenitaslak.zaman =
+                                      changedController[index].text;
+                                  for (var j = 0;
+                                      index < changedController.length;
+                                      j++) {
+                                    if (j == index) {
+                                      print("yapma");
+                                    } else {
+                                      changedController[j].text = "";
+                                    }
+                                  }
+                                  sayfaChanged = true;
+                                  setState(() {});
+                                },
+                                    currentTime: DateTime.now(),
+                                    locale: LocaleType.tr);
+                              },
+                            ),
+                          )
+                        : Container(
+                            width: MediaQuery.of(context).size.width * 0.6,
+                            height: MediaQuery.of(context).size.height * 0.02,
+                            child: TextField(
+                              enabled: _isEditingText,
+                              controller: controllers[2],
+                              onTap: () {
+                                print(index.toString());
+                                FocusScope.of(context)
+                                    .requestFocus(new FocusNode());
+
+                                DatePicker.showDateTimePicker(context,
+                                    showTitleActions: true,
+                                    minTime: DateTime(2010, 3, 5, 0, 0),
+                                    maxTime: DateTime(2100, 6, 6, 0, 0),
+                                    onConfirm: (val) {
+                                  secilenTarih = val;
+                                  controllers[2].text =
+                                      DateFormat('dd.MM.yyyy – kk:mm')
+                                          .format(secilenTarih)
+                                          .toString();
+
+                                  changedController[index].text =
+                                      DateFormat('dd.MM.yyyy – kk:mm')
+                                          .format(secilenTarih)
+                                          .toString();
+                                  yenitaslak.zaman =
+                                      changedController[index].text;
+                                  for (var j = 0;
+                                      j < changedController.length;
+                                      j++) {
+                                    if (j == index) {
+                                      print("yapma");
+                                    } else {
+                                      changedController[j].text = "";
+                                    }
+                                  }
+                                  sayfaChanged = true;
+                                  setState(() {});
+                                },
+                                    currentTime: DateTime.now(),
+                                    locale: LocaleType.tr);
+                              },
+                            ),
+                          ),
                   ])),
               new Divider(
                 height: 20,
@@ -263,7 +380,6 @@ class _DraftPageState extends State<DraftPage> {
   }
 
   Veriler taslakVeriGetir(int index, streamSnapshot) {
-    // Veriler(streamSnapshot.data?.docs[index]['baslik'],streamSnapshot.data?.docs[index]['konu'],streamSnapshot.data?.docs[index]['mekan'],streamSnapshot.data?.docs[index]['tarihsaat'],streamSnapshot.data?.docs[index]['departman'] );
     Veriler taslak = Veriler();
     taslak.VerilerEkle(
         streamSnapshot.data?.docs[index]['baslik'],
@@ -272,6 +388,7 @@ class _DraftPageState extends State<DraftPage> {
         streamSnapshot.data?.docs[index]['tarihsaat'],
         streamSnapshot.data?.docs[index]['departman'],
         streamSnapshot.data?.docs[index].reference.id);
+
     controllers = controllerOlustur(taslak);
     controllers[0].text = taslak.baslik;
     controllers[1].text = taslak.konu;
@@ -281,7 +398,7 @@ class _DraftPageState extends State<DraftPage> {
     return taslak;
   }
 
-  void taslakKaydet(int index, streamSnapshot, Veriler doc) async {
+  void taslakKaydet(Veriler doc) async {
     var collection = FirebaseFirestore.instance.collection('drafts');
     collection.doc(doc.id).update({'baslik': doc.baslik});
     collection.doc(doc.id).update({'konu': doc.konu});
@@ -296,6 +413,7 @@ class _DraftPageState extends State<DraftPage> {
     TextEditingController tarihController = TextEditingController();
     TextEditingController mekanController = TextEditingController();
     TextEditingController departmanController = TextEditingController();
+
     List<TextEditingController> controllerList = [
       baslikController,
       konuController,
@@ -303,6 +421,64 @@ class _DraftPageState extends State<DraftPage> {
       mekanController,
       departmanController
     ];
+
     return controllerList;
+  }
+
+  Future<String> tarihControllerOlustur() async {
+    final QuerySnapshot qSnap =
+        await FirebaseFirestore.instance.collection('drafts').get();
+    final int documents = qSnap.docs.length;
+    int lenght = 0;
+    lenght = documents;
+
+    for (var i = 0; i < lenght; i++) {
+      TextEditingController controller = TextEditingController();
+      changedController.add(controller);
+    }
+
+    return "oluşturuldu";
+  }
+
+  @override
+  void initState() {
+    tarihControllerOlustur();
+    // TODO: implement initState
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    changedController.clear();
+    super.dispose();
+  }
+
+  taslagiToplantilaraKaydet(Veriler yenitaslak) async {
+    if (secilenTarih.millisecondsSinceEpoch ==
+            DateTime.now().millisecondsSinceEpoch ||
+        secilenTarih.millisecondsSinceEpoch <
+            DateTime.now().millisecondsSinceEpoch) {
+      Map<String, dynamic> eklenecekToplanti = <String, dynamic>{};
+      eklenecekToplanti['baslik'] = yenitaslak.baslik;
+      eklenecekToplanti['konu'] = yenitaslak.konu;
+      eklenecekToplanti['mekan'] = yenitaslak.mekan;
+      eklenecekToplanti['departman'] = yenitaslak.departman;
+      eklenecekToplanti['tarihsaat'] =
+          DateFormat("dd-MM-yyyy HH:mm:ss").format(secilenTarih);
+      await NotificationVM.bildirimGonder(yenitaslak.baslik,
+          DateFormat("dd.MM.yyyy - HH:mm ").format(secilenTarih));
+      await firestore.collection('expiredtoplanti').add(eklenecekToplanti);
+    } else {
+      Map<String, dynamic> eklenecekToplanti = <String, dynamic>{};
+      eklenecekToplanti['baslik'] = yenitaslak.baslik;
+      eklenecekToplanti['konu'] = yenitaslak.konu;
+      eklenecekToplanti['mekan'] = yenitaslak.mekan;
+      eklenecekToplanti['departman'] = yenitaslak.departman;
+      eklenecekToplanti['tarihsaat'] =
+          DateFormat("dd-MM-yyyy HH:mm:ss").format(secilenTarih);
+      await NotificationVM.bildirimGonder(yenitaslak.baslik,
+          DateFormat("dd.MM.yyyy - HH:mm ").format(secilenTarih));
+      await firestore.collection('toplantilar').add(eklenecekToplanti);
+    }
   }
 }

@@ -44,7 +44,6 @@ class AddMeetingPageState extends State<AddMeetingPage> {
             child: Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
-        SizedBox(height: 10),
         Padding(
             //********tOPLANTI ADI*/
             padding: EdgeInsets.symmetric(horizontal: 15),
@@ -103,7 +102,6 @@ class AddMeetingPageState extends State<AddMeetingPage> {
                     hintText:
                         'Toplantı konusu hakkında kısa bir bilgi veriniz'))),
         SizedBox(height: 10),
-        SizedBox(height: 10),
         Padding(
             //******TOPLANTIYI MUHATAPLARI */
             padding: EdgeInsets.symmetric(horizontal: 15),
@@ -147,7 +145,7 @@ class AddMeetingPageState extends State<AddMeetingPage> {
                     textAlign: TextAlign.center),
               )),
         ),
-        SizedBox(height: 8),
+        //SizedBox(height: 2),
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 15),
           child: ElevatedButton(
@@ -276,7 +274,7 @@ class AddMeetingPageState extends State<AddMeetingPage> {
                 style: ButtonStyle(
                   backgroundColor: MaterialStateProperty.all(Colors.black),
                 ),
-                child: new Text("Geçmiş Toplantılar Sayfasına Git"),
+                child: new Text("Tamam"),
                 onPressed: () {
                   Navigator.of(context).pop();
                   Navigator.pushReplacement(context,
@@ -284,8 +282,7 @@ class AddMeetingPageState extends State<AddMeetingPage> {
                 },
               ),
 
-              //TODO: toplantılar arasında sıralama yapılacak
-              //TODO: taslak eklenecek
+              //TODO: toplantılar arasında sıralama yap
               //TODO: tarihi yaklaşanlar renk değiştirecek
               //TODO: localde katıldığım toplantılar falan tutulsun. SQFLite
             ],
@@ -308,15 +305,15 @@ class AddMeetingPageState extends State<AddMeetingPage> {
         builder: (BuildContext context) {
           // return object of type Dialog
           return AlertDialog(
-            title:  Text("Kaydedildi."),
-            content:  Text("Toplantıyı listede görebilirsiniz."),
+            title: Text("Kaydedildi."),
+            content: Text("Toplantıyı listede görebilirsiniz."),
             actions: <Widget>[
               // usually buttons at the bottom of the dialog
               ElevatedButton(
                 style: ButtonStyle(
                   backgroundColor: MaterialStateProperty.all(Colors.black),
                 ),
-                child:  Text("Listeye Dön"),
+                child: Text("Listeye Dön"),
                 onPressed: () {
                   Navigator.of(context).pop();
                   Navigator.pushReplacement(
@@ -366,7 +363,6 @@ class AddMeetingPageState extends State<AddMeetingPage> {
                       MaterialPageRoute(builder: (context) => DraftPage()));
                 },
               ),
-
             ],
           );
         },

@@ -29,6 +29,7 @@ class ReminderPageState extends State<ReminderPage> {
   var email;
   var secilenSayfa = "Toplantılar";
   var baslik;
+  String mesaj = '';
 
   @override
   void initState() {
@@ -46,13 +47,14 @@ class ReminderPageState extends State<ReminderPage> {
     return Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
-          title: Text(secilenSayfa),
+          title: Text(secilenSayfa,
+              style: TextStyle(color: Colors.white)),
         ),
         endDrawer: Drawer(
             child: ListView(padding: EdgeInsets.zero, children: [
           const DrawerHeader(
             decoration: BoxDecoration(color: Colors.black),
-            child: Text("Menü"),
+            child: Text("Menü", style: TextStyle(color:Colors.white,fontSize: 20)),
           ),
           ListTile(
               leading: Icon(Icons.logout),
@@ -62,13 +64,15 @@ class ReminderPageState extends State<ReminderPage> {
                 Navigator.pushReplacement(context,
                     MaterialPageRoute(builder: (context) => LoginPage()));
               }),
-          ListTile(
-              leading: Icon(Icons.draw),
-              title: const Text('Taslaklar'),
-              onTap: () {
-                secilenSayfa = 'Taslaklar';
-                setState(() {});
-              })
+          Visibility(
+              visible: adminControl == true,
+              child: ListTile(
+                  leading: Icon(Icons.draw),
+                  title: const Text('Taslaklar'),
+                  onTap: () {
+                    secilenSayfa = 'Taslaklar';
+                    setState(() {});
+                  }))
         ])),
         floatingActionButton: Visibility(
           visible: adminControl == true,
@@ -77,7 +81,10 @@ class ReminderPageState extends State<ReminderPage> {
               secilenSayfa = 'Toplantı Ekle';
               setState(() {});
             },
-            child: Icon(Icons.add),
+            child: Icon(
+              Icons.add,
+              color: Colors.white,
+            ),
             backgroundColor: Colors.black, //icon inside button
           ),
         ),
@@ -100,7 +107,7 @@ class ReminderPageState extends State<ReminderPage> {
                         onPressed: () {},
                         icon: Icon(
                           Icons.alarm_on,
-                          color: SharedPrefFayda.gecmisToplantilarColor,
+                          color: Colors.white,
                         )),
                     Text(
                       "Geçmiş Toplantılar",
@@ -132,7 +139,7 @@ class ReminderPageState extends State<ReminderPage> {
                         onPressed: () {},
                         icon: Icon(
                           Icons.alarm,
-                          color: SharedPrefFayda.gelecekToplantilarColor,
+                          color: Colors.white,
                         )),
                   ],
                 ),
@@ -166,22 +173,96 @@ class ReminderPageState extends State<ReminderPage> {
             height: 60,
             alignment: Alignment.center,
             padding: EdgeInsets.all(10),
-            child: Column(
+            child: Row(
               children: [
-                Text(streamSnapshot.data?.docs[index]['baslik'].toUpperCase(),
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold)),
-                Container(
-                  child: CountdownTimer(
-                    endTime:
-                        dateParse(streamSnapshot.data?.docs[index]['tarihsaat'])
-                            .millisecondsSinceEpoch,
-                    textStyle: TextStyle(fontSize: 12, color: Colors.white),
-                    //onEnd: onEnd(index, streamSnapshot)
+                SizedBox(
+                  width: 300,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 60.0),
+                    child: Column(
+                      children: [
+                        Text(
+                            streamSnapshot.data?.docs[index]['baslik']
+                                .toUpperCase(),
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold)),
+                        Container(
+                          child: CountdownTimer(
+                            endTime: dateParse(streamSnapshot.data?.docs[index]
+                                    ['tarihsaat'])
+                                .millisecondsSinceEpoch,
+                            textStyle: TextStyle(
+                                fontSize: 12,
+                                color: Color.fromRGBO(80, 245, 235, 10)),
+                            //onEnd: onEnd(index, streamSnapshot)
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
+                SizedBox(
+                    width: 50,
+                    child: Visibility(
+                        visible: adminControl == true,
+                        child: IconButton(
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  // return object of type Dialog
+                                  return AlertDialog(
+                                    title: Text("Toplantıyı İptal Et"),
+                                    content: Text(
+                                        "Toplantıyı iptal etmek istiyor musunuz? Kullanıcılar bu işlem sonunda bilgilendirilecektir."),
+                                    actions: <Widget>[
+                                      ElevatedButton(
+                                        style: ButtonStyle(
+                                          backgroundColor:
+                                              MaterialStateProperty.all(
+                                                  Colors.black),
+                                        ),
+                                        child: Text("Listeye Dön"),
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                          Navigator.pushReplacement(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      const ReminderPage()));
+                                        },
+                                      ),
+                                      ElevatedButton(
+                                        style: ButtonStyle(
+                                          backgroundColor:
+                                              MaterialStateProperty.all(
+                                                  Colors.black),
+                                        ),
+                                        child: Text("Toplantıyı İptal Et"),
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                          mesaj = streamSnapshot
+                                              .data?.docs[index]['baslik'];
+                                          mesaj += ' adlı toplantı iptal oldu.';
+                                          toplantiIptal(index, streamSnapshot);
+                                          bitenToplantiyiSil(
+                                              index, streamSnapshot);
+                                          NotificationVM.bildirimGonder(
+                                              mesaj,
+                                              DateFormat("dd.MM.yyyy - HH:mm ")
+                                                  .format(streamSnapshot
+                                                          .data?.docs[index]
+                                                      ['tarihsaat']));
+                                        },
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            },
+                            icon: Icon(Icons.clear, color: Colors.white))))
               ],
             ),
             decoration: BoxDecoration(
@@ -399,5 +480,12 @@ class ReminderPageState extends State<ReminderPage> {
     } else {
       return false;
     }
+  }
+
+  toplantiIptal(int index, streamSnapshot) {
+    FirebaseFirestore.instance
+        .collection("toplantilar")
+        .doc(streamSnapshot.data?.docs[index].id)
+        .delete();
   }
 }
